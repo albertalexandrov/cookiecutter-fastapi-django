@@ -1,0 +1,8 @@
+{
+  "project_slug": {
+    "type": "string"
+  },
+  "project_name": {
+    "type": "string"
+  }
+}
