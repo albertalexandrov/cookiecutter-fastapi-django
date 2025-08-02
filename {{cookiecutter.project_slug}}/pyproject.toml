@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "{{cookiecutter.project_slug}}"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.116.1"
+{%- if cookiecutter.integrate_prometheus == "y" %}
+prometheus-fastapi-instrumentator = "^7.1.0"
+{%- endif %}
+uvicorn = "^0.35.0"
+email-validator = "^2.2.0"
+environs = "^14.2.0"
+fastapi-django = {path = "/Users/albertaleksandrov/PycharmProjects/fastapi-django"}
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

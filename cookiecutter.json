@@ -1,4 +1,12 @@
 {
-  "project_slug": "project_slug",
-  "project_name": "Название проекта"
+  "project_name": null,
+  "project_slug": null,
+  "include_examples": "y",
+  "integrate_prometheus": "y",
+  "__prompts__": {
+    "project_name": "Название проекта",
+    "project_slug": "Папка проекта",
+    "include_examples": "Включить в проект примеры? (y/n)",
+    "integrate_prometheus": "Интегрировать Prometheus? (y/n)"
+  }
 }

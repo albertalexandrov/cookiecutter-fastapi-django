@@ -1,4 +1,51 @@
-from fastapi_django.app import get_default_app
+import os
+import shutil
+from contextlib import asynccontextmanager
+from pathlib import Path
+from tempfile import gettempdir
 
-app = get_default_app()
+from fastapi import FastAPI
+from fastapi_django.conf import settings
 
+{%- if cookiecutter.include_examples|lower == "y" %}
+from web.api.example import router as example_router
+{%- endif %}
+
+
+{% if cookiecutter.integrate_prometheus == "y" -%}
+def setup_prometheus(app: FastAPI) -> None:
+    if not settings.PROMETHEUS_ENABLED:
+        return
+    prometheus_multiproc_dir = Path(gettempdir()) / "prometheus"
+    shutil.rmtree(prometheus_multiproc_dir, ignore_errors=True)
+    prometheus_multiproc_dir.mkdir(parents=True, exist_ok=True)
+    os.environ["PROMETHEUS_MULTIPROC_DIR"] = prometheus_multiproc_dir.as_posix()
+    # сохранить переменную окружения PROMETHEUS_MULTIPROC_DIR необходимо до импорта Instrumentator,
+    # тк на основе наличия переменной PROMETHEUS_MULTIPROC_DIR prometheus_client определяет ValueClass
+    # https://github.com/prometheus/client_python/blob/73680284ce63f0bc0f23cfc42af06e74fd7e3ccf/prometheus_client/values.py#L139
+    from prometheus_fastapi_instrumentator import Instrumentator
+    instrumentator = Instrumentator(should_group_status_codes=False)
+    instrumentator.instrument(app)
+    instrumentator.expose(app, should_gzip=True, name="prometheus_metrics")
+{%- endif %}
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    app.middleware_stack = None
+    {%- if cookiecutter.integrate_prometheus == "y" %}
+    setup_prometheus(app)
+    {%- endif %}
+    app.middleware_stack = app.build_middleware_stack()
+    yield
+
+
+def create_app() -> FastAPI:
+    app = FastAPI(
+        title="{{ cookiecutter.project_name }}",
+        lifespan=lifespan,
+    )
+    {% if cookiecutter.include_examples | lower == "y" -%}
+    app.include_router(example_router)
+    {%- endif %}
+    return app
