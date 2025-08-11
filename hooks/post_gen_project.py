@@ -4,8 +4,8 @@ from pathlib import Path
 
 
 def remove_examples():
-    example_api_path = Path(os.getcwd(), "src", "web", "api", "example")
-    example_command_path = Path(os.getcwd(), "src", "commands", "example_command.py")
+    example_api_path = Path(os.getcwd(), "src/web/api/example")
+    example_command_path = Path(os.getcwd(), "src/management/commands/calculator.py")
     for path in [example_api_path, example_command_path]:
         if path.is_dir():
             shutil.rmtree(path)
